@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+    php:
+        build: .
+        restart: always
+        ports:
+            - "8080:80"
+        volumes:
+            - ./src:/var/www/html
+            - ./log:/var/log/apache2
+        depends_on:
+            - db
+    db:
+        image: mysql:8.0
+        restart: always
+        hostname: db
+        ports:
+            - "3308:3308"
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            - MYSQL_DATABASE=appDB
+            - MYSQL_USER=user
+            - MYSQL_PASSWORD=password
+            - MYSQL_ROOT_PASSWORD=test
+        volumes:
+            - ./dump:/docker-entrypoint-initdb.d
+            - ./conf:/etc/mysql/conf.d
