@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+
+    postgres:
+        image: postgres
+        restart: always
+        environment:
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: prac5
+        container_name: postgres
+        hostname: postgres
+        volumes:
+            - ./postgres/dump:/docker-entrypoint-initdb.d
+        ports:
+            - 5432:5432
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8085:8080
+        container_name: adminer
+        hostname: adminer
+
+    java:
+        image: amazoncorretto:17-alpine-jdk
+        ports:
+            - 8100:8100
+        command: ["/usr/bin/java", "-jar", "/home/prac5-1.0-SNAPSHOT.war", "--server.port=8100"]
+        volumes:
+            - ./java/home:/home
+        container_name: java
+        hostname: java
+        depends_on:
+            - postgres

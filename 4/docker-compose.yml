@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+    apache:
+        build:
+            context: ./apache            
+        restart: always
+        ports:
+            - "8080:80"
+        volumes:
+            - ./apache/src:/var/www/html
+            - ./apache/log:/var/log/apache2
+        depends_on:
+            - mysql
+        container_name: apache
+        hostname: apache
+    mysql:
+        image: mysql:8.0
+        restart: always
+        hostname: dbhost
+        ports:
+            - "3306:3306"
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            - MYSQL_DATABASE=appDB
+            - MYSQL_USER=user
+            - MYSQL_PASSWORD=password
+            - MYSQL_ROOT_PASSWORD=test
+        volumes:
+            - ./mysql/dump:/docker-entrypoint-initdb.d
+            - ./mysql/conf:/etc/mysql/conf.d
+            #- ./mysql/db_data:/var/lib/mysql
+        container_name: mysql
+    phpmyadmin:
+        image: phpmyadmin
+        restart: always
+        ports:
+            - 8081:80
+        environment:
+            - PMA_HOST=dbhost
+        container_name: phpmyadmin
+    nginx:
+        image: nginx
+        restart: always
+        ports:
+            - "80:80"
+        depends_on:
+            - apache
+        container_name: nginx    
+        hostname: nginx
+        volumes:
+            - ./nginx/src:/usr/share/nginx/html
+            - ./nginx/templates:/etc/nginx/templates
+            - ./nginx/log:/var/log/nginx
+        environment:
+            - NGINX_NAME=nginx

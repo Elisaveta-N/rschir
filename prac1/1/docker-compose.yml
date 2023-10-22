@@ -15,7 +15,7 @@ services:
         restart: always
         hostname: db
         ports:
-            - "3308:3308"
+            - "3306:3306"
         command: --default-authentication-plugin=mysql_native_password
         environment:
             - MYSQL_DATABASE=appDB

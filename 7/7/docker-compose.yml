@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+    postgres:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: prac7
+        container_name: postgres
+        hostname: postgres
+        volumes:
+            - ./postgres/dump:/docker-entrypoint-initdb.d
+        expose:
+            - "5555" # Publishes 5555 to other containers but NOT to host machine
+        ports:
+            - "5555:5555"
+        command: -p 5555     
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8085:8080
+        container_name: adminer
+        hostname: adminer
+
+    javaweb:
+        image: amazoncorretto:17-alpine-jdk
+        ports:
+            - 8100:8100
+        command: ["/usr/bin/java", "-jar", "/home/jwttestapp-0.0.1-SNAPSHOT.war", "--server.port=8100"]
+        volumes:
+            - ./javaweb/home:/home
+        container_name: javaweb
+        hostname: javaweb
+        depends_on:
+            - postgres
+
+    javaauth:
+        image: amazoncorretto:17-alpine-jdk
+        ports:
+            - '9898:9898'
+        expose:
+            - "9898"
+        command: ["/usr/bin/java", "-jar", "/home/prac7auth-0.0.1-SNAPSHOT.war", "--server.port=9898"]
+        volumes:
+            - ./javaauth/home:/home
+        container_name: javaauth
+        hostname: javaauth
+        depends_on:
+            - postgres
+
+    redis:
+        image: redis
+        restart: always
+        ports:
+            - '6379:6379'
+        command: redis-server --save 60 1 --loglevel warning
+        volumes: 
+            - ./redis/dbdata:/data
+        container_name: redis
+        hostname: redis
